@@ -1,0 +1,17 @@
+[project]
+name = "hello-faststream"
+version = "0.1.0"
+description = "Simple Producer/Consumer application created to familiarize with faststream."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "faststream[nats]>=0.6.7",
+    "msgspec>=0.21.0",
+]
+
+[project.scripts]
+hello-faststream = "hello_faststream.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
