@@ -1,0 +1,15 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "hello-faststream DB",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "hello_faststream",
+            "Username": "postgres",
+            "Password": "postgres",
+            "SavePassword": true,
+            "SSLMode": "prefer"
+        }
+    }
+}

@@ -1,0 +1,74 @@
+"name": "hello-faststream"
+
+services:
+  devcontainer:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    userns_mode: "keep-id"
+
+  postgres:
+    image: postgres:18.2
+    restart: unless-stopped
+    volumes:
+      - postgres:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hello_faststream
+
+  pgadmin:
+    image: docker.io/dpage/pgadmin4:9.14
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+      - ./config/pgadmin-servers.json:/pgadmin4/servers.json:ro
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  nats:
+    image: docker.io/nats:2.12
+    command: ["-js", "-sd", "/data"]  # -js enables JetStream, -sd defines data location
+    ports:
+      - "4222:4222" # communication port (client)
+      - "8222:8222" # monitoring port (HTTP Management)
+    volumes:
+      - nats:/data
+
+  nui:
+    image: ghcr.io/nats-nui/nui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - NUI_NATS_SERVERS=nats://nats:4222
+    depends_on:
+      - nats
+
+  lgtm:
+    image: grafana/otel-lgtm:0.24.0
+    ports:
+      - "3000:3000"   # Grafana UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - OTEL_METRIC_EXPORT_INTERVAL=5000
+    volumes:
+      - lgtm:/data
+
+volumes:
+  postgres:
+  pgadmin:
+  nats:
+  lgtm:

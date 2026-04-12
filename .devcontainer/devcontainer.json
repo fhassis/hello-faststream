@@ -1,0 +1,24 @@
+{
+	"name": "hello-faststream",
+	"dockerComposeFile": "compose.yml",
+	"service": "devcontainer",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {},
+		"ghcr.io/ksachdeva/devcontainer-features/natscli:1": {},
+		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+
+	// Mounts claude code folder from host to container to persist history and settings
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// This can be used to network with other containers or the host.
+	"forwardPorts": [5432, 5050, 4222, 8222, 8080, 3000]
+
+	// Uncomment to connect as root instead.
+	// "remoteUser": "root"
+}
