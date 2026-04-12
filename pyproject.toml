@@ -6,12 +6,16 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "asyncpg>=0.31.0",
-    "faststream[nats]>=0.6.7",
+    "faststream[nats,cli]>=0.6.7",
     "msgspec>=0.21.0",
 ]
 
 [project.scripts]
 hello-faststream = "hello_faststream.main:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]

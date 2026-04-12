@@ -6,14 +6,19 @@
 	"features": {
 		"ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {},
 		"ghcr.io/ksachdeva/devcontainer-features/natscli:1": {},
+		"ghcr.io/esimkowitz/devcontainer-features/fish-starship:1": {
+			"fishGreeting": ""
+		},
+		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+		"ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
-	// Mounts claude code folder from host to container to persist history and settings
-	"mounts": [
-		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind"
-	],
+	// // Mounts claude code folder from host to container to persist history and settings
+	// "mounts": [
+	// 	"source=${localEnv:USERPROFILE}/.claude,target=/home/vscode/.claude,type=bind"
+	// ],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.

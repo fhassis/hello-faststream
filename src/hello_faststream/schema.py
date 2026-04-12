@@ -1,8 +1,15 @@
-from msgspec import Struct
+from datetime import datetime
 from decimal import Decimal
 
-class Trade(Struct):
-    symbol: str
-    price: Decimal
-    amount: Decimal
-    exchange: str
+from msgspec import Struct
+
+
+class RawSensorData(Struct):
+    occurred_at: datetime
+    sensor_read: Decimal
+
+
+class ProcessedSensorData(Struct):
+    occurred_at: datetime
+    processed_value: Decimal
+    status: str
