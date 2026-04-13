@@ -3,6 +3,7 @@ import os
 import sys
 
 import structlog
+from msgspec.json import encode as msgspec_encode
 
 
 def configure_logging(service_name: str) -> None:
@@ -23,7 +24,8 @@ def configure_logging(service_name: str) -> None:
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.ExceptionRenderer(),
-            structlog.processors.JSONRenderer(),
+            # msgspec is faster than stdlib json; decode bytes→str for stdlib logging compatibility
+            structlog.processors.JSONRenderer(serializer=lambda obj, **_: msgspec_encode(obj).decode()),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         context_class=dict,
