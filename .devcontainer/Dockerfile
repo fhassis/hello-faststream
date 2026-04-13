@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y lsb-release wget gnupg \
     && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
-    && apt-get install -y postgresql-client-18 \
+    && apt-get install -y postgresql-client-18 git openssh-client \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ENV DEBIAN_FRONTEND=dialog

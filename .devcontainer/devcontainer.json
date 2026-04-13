@@ -5,7 +5,6 @@
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"remoteUser": "root",
 	"features": {
-		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {},
 		"ghcr.io/ksachdeva/devcontainer-features/natscli:1": {},
 		"ghcr.io/esimkowitz/devcontainer-features/fish-starship:1": {
