@@ -18,6 +18,8 @@ The project uses a Dev Container (Docker Compose). All infrastructure services s
 | Postgres | `postgres:5432`              | `localhost:5432`        | Database (`hello_faststream`)  |
 | pgAdmin  | `http://pgadmin:80`          | http://localhost:5050   | Postgres web UI                |
 | Grafana  | `http://lgtm:3000`           | http://localhost:3000   | Dashboards (LGTM Stack)        |
+| OTLP gRPC| `http://lgtm:4317`           | `localhost:4317`        | OpenTelemetry ingestion        |
+| OTLP HTTP| `http://lgtm:4318`           | `localhost:4318`        | OpenTelemetry ingestion (HTTP) |
 
 Python version is managed via `.python-version` (3.14). Dependencies are managed with `uv`.
 
@@ -37,7 +39,7 @@ uv run --env-file .env faststream run hello_faststream.consumer_worker:app
 uv run --env-file .env faststream run hello_faststream.producer_worker:app
 ```
 
-Environment variables are loaded from `.env` (see `.env.example`). Both workers require `NATS_URL`.
+Environment variables are loaded from `.env` (see `.env.example`). Workers require `NATS_URL`, `LOG_LEVEL`, and `OTLP_ENDPOINT`.
 
 ## Architecture
 
@@ -50,8 +52,10 @@ producer_worker  →  [sensors.raw]  →  consumer_worker  →  [sensors.process
 - **`producer_worker.py`** — Generates `RawSensorData` (timestamp + random Decimal reading) every 2 seconds and publishes to `sensors.raw`.
 - **`consumer_worker.py`** — Subscribes to `sensors.raw`, applies a 2x adjustment, and republishes as `ProcessedSensorData` to `sensors.processed`.
 - **`schema.py`** — Defines `RawSensorData` and `ProcessedSensorData` as `msgspec.Struct` types. msgspec is used (instead of Pydantic) for low-latency serialization/deserialization at the NATS boundary.
+- **`app_factory.py`** — `create_app(title)` centralises broker + app creation, logging initialisation, and shutdown wiring. Both workers call this instead of constructing `NatsBroker`/`FastStream` directly.
+- **`log_settings.py`** — Configures structlog (JSON) → stdlib → `QueueHandler` → background thread → OTel `LoggingHandler` → OTLP → Loki.
 
-Each worker creates its own `NatsBroker` and `FastStream` app instance. Lifecycle hooks (`on_startup`, `on_shutdown`, `after_startup`) handle initialization and cleanup logic.
+Each worker creates its app via `create_app()`. FastStream's `Logger` dependency is injected into lifecycle hooks and subscriber handlers.
 
 ## Planned Stack (in progress)
 

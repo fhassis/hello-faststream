@@ -1,5 +1,5 @@
-# Extending the base Debian 13 (Trixie) image
-FROM mcr.microsoft.com/devcontainers/base:trixie
+# Define base image
+FROM docker.io/python:3.14-slim-trixie
 
 # Avoid prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive

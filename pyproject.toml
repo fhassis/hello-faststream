@@ -8,6 +8,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "faststream[nats,cli]>=0.6.7",
     "msgspec>=0.21.0",
+    "structlog>=25.1.0",
 ]
 
 [project.scripts]
@@ -19,3 +20,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.10",
+]

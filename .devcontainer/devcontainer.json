@@ -3,7 +3,9 @@
 	"dockerComposeFile": "compose.yml",
 	"service": "devcontainer",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"remoteUser": "root",
 	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {},
 		"ghcr.io/ksachdeva/devcontainer-features/natscli:1": {},
 		"ghcr.io/esimkowitz/devcontainer-features/fish-starship:1": {
@@ -14,12 +16,18 @@
 		"ghcr.io/esimkowitz/devcontainer-features/claude-code-persistence:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
-
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// This can be used to network with other containers or the host.
-	"forwardPorts": [5432, 5050, 4222, 8222, 8080, 3000]
-
-	// Uncomment to connect as root instead.
-	// "remoteUser": "root"
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"charliermarsh.ruff",
+				"tamasfe.even-better-toml",
+				"Anthropic.claude-code"
+			]
+		}
+	},
+	"forwardPorts": [5432, 5050, 4222, 8222, 8080, 3000],
+	"remoteEnv": {
+		"UV_LINK_MODE": "copy"
+	}
 }
