@@ -3,9 +3,21 @@ import os
 import sys
 from typing import Any
 
-import structlog
 from msgspec.json import encode as msgspec_encode
 from opentelemetry import trace
+from structlog import configure
+from structlog.processors import (
+    ExceptionRenderer,
+    JSONRenderer,
+    StackInfoRenderer,
+    TimeStamper,
+)
+from structlog.stdlib import (
+    BoundLogger,
+    LoggerFactory,
+    add_log_level,
+    add_logger_name,
+)
 
 
 def _add_otel_context(
@@ -37,35 +49,41 @@ def configure_logging() -> None:
     in Grafana (Loki → Tempo).  A log collector (Alloy / Promtail) is
     expected to scrape stdout and forward records to Loki.
     """
+
+    # resolve the minimum log level from the env var, defaulting to INFO
     level_name = os.environ.get("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_name, logging.INFO)
 
     # structlog — formats records as JSON before they hit stdlib
-    structlog.configure(
+    configure(
+        # processor chain: runs top-to-bottom on every log record
         processors=[
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.add_logger_name,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.ExceptionRenderer(),
+            # adds a "level" field (info, debug, error, ...)
+            add_log_level,
+            # adds a "logger" field (the logger name, e.g. "producer_worker")
+            add_logger_name,
+            # adds a "timestamp" field in ISO-8601 / UTC
+            TimeStamper(fmt="iso"),
+            # renders Python stack info when stack_info=True is passed
+            StackInfoRenderer(),
+            # flattens exception info into the event dict
+            ExceptionRenderer(),
+            # injects trace_id / span_id when running inside an OTel span
             _add_otel_context,
+            # final step: serialise the event dict to a JSON string.
             # msgspec is faster than stdlib json; decode bytes→str for stdlib logging compatibility
-            structlog.processors.JSONRenderer(
-                serializer=lambda obj, **_: msgspec_encode(obj).decode()
-            ),
+            JSONRenderer(serializer=lambda obj, **_: msgspec_encode(obj).decode()),
         ],
-        wrapper_class=structlog.stdlib.BoundLogger,
+        # stdlib-compatible bound logger so FastStream / third-party libs can receive it as a drop-in logger
+        wrapper_class=BoundLogger,
+        # plain dict for per-logger bound context
         context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
+        # underlying logger is logging.getLogger(name) — integrates with stdlib
+        logger_factory=LoggerFactory(),
     )
 
+    # configure the stdlib root logger to actually emit at the requested level
     root = logging.getLogger()
     root.setLevel(level)
+    # writes the structlog-formatted JSON line to stdout
     root.addHandler(logging.StreamHandler(sys.stdout))
-
-    # Suppress noisy third-party loggers
-    logging.getLogger("nats").setLevel(logging.WARNING)
-
-
-def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name)

@@ -4,28 +4,16 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from msgspec.json import encode as msgspec_encode
+from structlog import get_logger
 
 from hello_faststream.app_factory import create_app
-from hello_faststream.log_settings import get_logger
 from hello_faststream.schema import RawSensorData
 
-# configures app and broker via the factory, which also sets up structured logging
-app, broker = create_app("producer")
+# gets a reference to the app and broker
+app, broker = create_app("producer_worker")
 
-# Logger injection via FastStream's DI only works in subscriber handlers, not lifecycle hooks
-logger = get_logger(__name__)
-
-
-@app.on_startup
-async def on_start() -> None:
-    """Worker initialization logic, executed when the process starts."""
-    logger.info("Producer worker started.")
-
-
-@app.on_shutdown
-async def on_stop() -> None:
-    """Worker cleanup logic, executed when the process shuts down."""
-    logger.info("Producer worker stopped.")
+# gets the application logger, since DI does not work in the produce loop
+logger = get_logger("producer_worker")
 
 
 @app.after_startup
