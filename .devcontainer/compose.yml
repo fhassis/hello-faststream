@@ -39,7 +39,8 @@ services:
 
   nats:
     image: docker.io/nats:2.12
-    command: ["-js", "-sd", "/data"]  # -js enables JetStream, -sd defines data location
+    # -js enables JetStream, -sd defines data location, -m sets monitoring port
+    command: ["-js", "-sd", "/data", "-m", "8222"]
     ports:
       - "4222:4222" # communication port (client)
       - "8222:8222" # monitoring port (HTTP Management)
@@ -49,7 +50,7 @@ services:
   nui:
     image: ghcr.io/nats-nui/nui:latest
     ports:
-      - "8080:8080"
+      - "8080:31311"
     environment:
       - NUI_NATS_SERVERS=nats://nats:4222
     depends_on:
