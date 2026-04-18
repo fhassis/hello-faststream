@@ -6,7 +6,7 @@ import structlog
 from msgspec.json import encode as msgspec_encode
 
 
-def configure_logging(service_name: str) -> None:
+def configure_logging() -> None:
     """
     Configure structured JSON logging to stdout.
 
@@ -25,7 +25,9 @@ def configure_logging(service_name: str) -> None:
             structlog.processors.StackInfoRenderer(),
             structlog.processors.ExceptionRenderer(),
             # msgspec is faster than stdlib json; decode bytes→str for stdlib logging compatibility
-            structlog.processors.JSONRenderer(serializer=lambda obj, **_: msgspec_encode(obj).decode()),
+            structlog.processors.JSONRenderer(
+                serializer=lambda obj, **_: msgspec_encode(obj).decode()
+            ),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         context_class=dict,

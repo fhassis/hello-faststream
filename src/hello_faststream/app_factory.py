@@ -16,10 +16,12 @@ def create_app(title: str) -> tuple[FastStream, NatsBroker]:
     and the app so FastStream's internal messages flow through the same pipeline,
     and registers a shutdown hook to flush the log queue on exit.
     """
-    configure_logging(title)
+    configure_logging()
 
     logger = logging.getLogger(f"hello_faststream.{title}")
-    broker = NatsBroker(os.environ["NATS_URL"], serializer=MsgSpecSerializer(), logger=logger)
+    broker = NatsBroker(
+        os.environ["NATS_URL"], serializer=MsgSpecSerializer(), logger=logger
+    )
     app = FastStream(broker, logger=logger)
 
     @app.on_shutdown
