@@ -6,7 +6,7 @@ from decimal import Decimal
 from msgspec.json import encode as msgspec_encode
 from structlog import get_logger
 
-from hello_faststream.app_factory import create_app
+from hello_faststream.app_factory import SENSORS_STREAM, create_app
 from hello_faststream.schema import RawSensorData
 
 # gets a reference to the app and broker
@@ -32,7 +32,8 @@ async def _produce_loop() -> None:
         )
 
         # encode to bytes via msgspec before publishing — FastStream's json.dumps doesn't handle msgspec.Struct
-        await broker.publish(msgspec_encode(data), subject="sensors.raw")
+        # stream= routes through JetStream so we get a server ack confirming durable persistence
+        await broker.publish(msgspec_encode(data), subject="sensors.raw", stream=SENSORS_STREAM.name)
         logger.debug(f"Produced: {data.sensor_read}")
 
         # throttle the production rate
